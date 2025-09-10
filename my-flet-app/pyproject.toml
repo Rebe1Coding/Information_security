@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "my-flet-app"
+version = "0.1.0"
+description = "A Flet application"
+authors = ["Your Name <youremail@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flet = "^0.1.0"  # Replace with the latest version of Flet
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
