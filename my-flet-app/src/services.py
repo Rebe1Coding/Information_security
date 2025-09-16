@@ -1,15 +1,30 @@
 from collections import Counter
 import heapq
 import math
-
+import pandas as pd
+from typing import Tuple
 class ShannonFano:
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, text=None):
+        self.__text = text
         self.freq = dict(Counter(text))
         self.codes = {}
         self._build_codes()
     
+
+    @property
+    def text(self):
+        return self.__text
+    
+    @text.setter
+    def text(self, value):
+        self.__text = value
+        self.freq = dict(Counter(value))
+        self.codes = {}
+        self._build_codes()
+
     def _build_codes(self):
+        if self.text is None or not self.freq:
+            return 
         items = sorted(self.freq.items(), key=lambda x: x[1], reverse=True)
         self._shannon_fano(items, "")
     
@@ -43,25 +58,45 @@ class ShannonFano:
                 buffer = ""
         return result
     
-    def analytics(self):
+    def analytics(self) -> Tuple[pd.DataFrame, float, float]:
         total = sum(self.freq.values())
-        print("Символ | Частота | Код | Длина кода")
+        analytics = []
         for char, f in self.freq.items():
-            print(f"'{char}' | {f/total:.3f} | {self.codes[char]} | {len(self.codes[char])}")
+            analytics.append({"Символ": char, 
+                              "Вероятность": f/total, 
+                              "Код": self.codes[char], 
+                              "Длина кода":len(self.codes[char])
+                              })
+            
         avg_len = sum((len(self.codes[c]) * f/total) for c, f in self.freq.items())
         entropy = -sum((f/total) * math.log2(f/total) for f in self.freq.values())
-        print(f"\nСредняя длина кода: {avg_len:.3f}")
-        print(f"Энтропия: {entropy:.3f}")
-
+        df = pd.DataFrame(analytics)
+        return df, avg_len, entropy 
 
 class Huffman:
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, text=None):
+        self.__text = text
         self.freq = dict(Counter(text))
         self.codes = {}
         self._build_codes()
     
+
+    @property
+    def text(self):
+        return self.__text
+    @text.setter
+    def text(self, value):
+        if value is None:
+            return 
+        self.__text = value
+        self.freq = dict(Counter(value))
+        self.codes = {}
+        self._build_codes()
+        
+    
     def _build_codes(self):
+        if self.text is None or not self.freq:
+            return
         heap = [[f, [char, ""]] for char, f in self.freq.items()]
         heapq.heapify(heap)
         while len(heap) > 1:
@@ -89,32 +124,36 @@ class Huffman:
                 buffer = ""
         return result
     
-    def analytics(self):
+    def analytics(self) -> Tuple[pd.DataFrame, float, float]:
         total = sum(self.freq.values())
-        print("Символ | Частота | Код | Длина кода")
+        analytics = []
         for char, f in self.freq.items():
-            print(f"'{char}' | {f/total:.3f} | {self.codes[char]} | {len(self.codes[char])}")
+            analytics.append({"Символ": char, 
+                              "Вероятность": f/total, 
+                              "Код": self.codes[char], 
+                              "Длина кода":len(self.codes[char])
+                              })
+       
         avg_len = sum((len(self.codes[c]) * f/total) for c, f in self.freq.items())
         entropy = -sum((f/total) * math.log2(f/total) for f in self.freq.values())
-        print(f"\nСредняя длина кода: {avg_len:.3f}")
-        print(f"Энтропия: {entropy:.3f}")
+        df = pd.DataFrame(analytics)
+        return df, avg_len, entropy
 
+# # Пример использования
+# text = "hello world"
+# sf = ShannonFano(text)
+# hf = Huffman(text)
 
-# Пример использования
-text = "hello world"
-sf = ShannonFano(text)
-hf = Huffman(text)
+# print("=== Shannon-Fano ===")
+# sf.analytics()
+# encoded_sf = sf.encode()
+# decoded_sf = sf.decode(encoded_sf)
+# print(f"Закодировано: {encoded_sf}")
+# print(f"Декодировано: {decoded_sf}")
 
-print("=== Shannon-Fano ===")
-sf.analytics()
-encoded_sf = sf.encode()
-decoded_sf = sf.decode(encoded_sf)
-print(f"Закодировано: {encoded_sf}")
-print(f"Декодировано: {decoded_sf}")
-
-print("\n=== Huffman ===")
-hf.analytics()
-encoded_hf = hf.encode()
-decoded_hf = hf.decode(encoded_hf)
-print(f"Закодировано: {encoded_hf}")
-print(f"Декодировано: {decoded_hf}")
+# print("\n=== Huffman ===")
+# hf.analytics()
+# encoded_hf = hf.encode()
+# decoded_hf = hf.decode(encoded_hf)
+# print(f"Закодировано: {encoded_hf}")
+# print(f"Декодировано: {decoded_hf}")
